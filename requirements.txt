@@ -22,7 +22,6 @@ uvicorn>=0.22.0
 
 # Database (optional - for later phases)
 sqlalchemy>=2.0.0
-sqlite3  # Built-in with Python
 
 # Testing
 pytest>=7.4.0
@@ -32,3 +31,23 @@ pytest-asyncio>=0.21.0
 black>=23.0.0
 flake8>=6.0.0
 mypy>=1.5.0
+
+# Additional data collection dependencies
+aiohttp>=3.8.0
+asyncio-throttle>=1.0.2
+python-dateutil>=2.8.0
+pytz>=2023.3
+schedule>=1.2.0
+
+# Data validation and parsing
+pydantic>=2.0.0
+xmltodict>=0.13.0
+beautifulsoup4>=4.12.0
+
+# Database enhancements
+alembic>=1.11.0
+psycopg2-binary>=2.9.0  # Optional: for PostgreSQL later
+
+# Caching
+redis>=4.6.0  # Optional: for Redis caching
+diskcache>=5.6.0  # File-based caching alternative
