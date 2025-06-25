@@ -2,10 +2,10 @@
 
 from .market_analyzer import MarketAnalyzer
 from .economic_analyzer import EconomicAnalyzer
-from .portfolio_analyzer import PortfolioAnalyzer
+from .constrained_portfolio_analyzer import ConstrainedPortfolioAnalyzer
 
 __all__ = [
     'MarketAnalyzer',
     'EconomicAnalyzer', 
-    'PortfolioAnalyzer'
+    'ConstrainedPortfolioAnalyzer'
 ]

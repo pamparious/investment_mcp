@@ -15,11 +15,11 @@ class OllamaProvider(BaseAIProvider):
     
     def __init__(
         self, 
-        model_name: str = "llama3.2:3b",
+        model_name: str = "gemma3:1b",
         base_url: str = "http://localhost:11434",
-        temperature: float = 0.1,
-        max_tokens: int = 2048,
-        timeout: int = 60
+        temperature: float = 0.3,
+        max_tokens: int = 1024,
+        timeout: int = 30
     ):
         """
         Initialize Ollama provider.
@@ -207,6 +207,33 @@ class OllamaProvider(BaseAIProvider):
               "risk_mitigation": ["strategy1", "strategy2"]
             }}
             """
+        elif analysis_type == "constrained_portfolio_recommendation":
+            # Extract fund context for AI analysis
+            fund_context = data_context.get('available_funds', {})
+            investment_params = data_context.get('investment_parameters', {})
+            constraints = data_context.get('constraints', {})
+            base_suggestion = data_context.get('base_suggestion', {})
+            
+            approved_fund_list = constraints.get('approved_fund_ids', [])
+            fund_details = fund_context.get('fund_details', [])
+            
+            # Create simplified prompt for faster processing
+            risk = investment_params.get('risk_tolerance', 'balanced')
+            amount = investment_params.get('amount', 0)
+            
+            # Get top 6 fund names for simplified context
+            top_funds = [f['id'] for f in fund_details[:6]]
+            
+            prompt = f"""Create portfolio allocation for {amount:,} SEK, {risk} risk tolerance.
+            
+Use ONLY these funds: {top_funds[:6]}
+Allocations must sum to 100%.
+
+Respond with JSON only:
+{{
+  "recommended_allocation": {{"FUND_ID": 0.XX}},
+  "reasoning": "Brief explanation"
+}}"""
         else:  # market
             prompt = f"""
             Analyze this market context:

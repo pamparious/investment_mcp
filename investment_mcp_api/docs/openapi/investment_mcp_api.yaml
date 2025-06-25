@@ -1,0 +1,1176 @@
+openapi: 3.0.3
+info:
+  title: Investment MCP API
+  description: |
+    Swedish Investment Analysis API with Historical Data and AI-Powered Recommendations
+    
+    This API provides comprehensive investment analysis for Swedish markets, including:
+    - 20+ years of historical fund data analysis
+    - Real-time Swedish economic indicators
+    - AI-powered portfolio optimization
+    - Risk assessment and stress testing
+    - Market regime analysis
+    
+    ## Authentication
+    API keys are required for all endpoints. Contact your administrator for access.
+    
+    ## Rate Limiting
+    - Standard tier: 100 requests per minute
+    - Premium tier: 1000 requests per minute
+    
+    ## Data Sources
+    - Riksbank (Swedish Central Bank) for economic data
+    - SCB (Statistics Sweden) for demographic and economic statistics  
+    - Yahoo Finance and other providers for historical fund data
+    
+  version: 3.0.0
+  contact:
+    name: Investment MCP API Support
+    email: support@investment-mcp.com
+    url: https://docs.investment-mcp.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  
+servers:
+  - url: https://api.investment-mcp.com/v1
+    description: Production server
+  - url: https://staging-api.investment-mcp.com/v1
+    description: Staging server
+  - url: http://localhost:8000/v1
+    description: Development server
+
+security:
+  - ApiKeyAuth: []
+
+paths:
+  # Portfolio Analysis Endpoints
+  /portfolio/analysis:
+    post:
+      tags:
+        - Portfolio Analysis
+      summary: Generate AI-powered portfolio analysis
+      description: |
+        Generate comprehensive portfolio analysis using historical data and Swedish economic context.
+        Includes optimal allocation recommendations, risk assessment, and stress testing.
+      operationId: analyzePortfolio
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PortfolioAnalysisRequest'
+            examples:
+              conservative:
+                summary: Conservative investor analysis
+                value:
+                  risk_profile: "conservative"
+                  investment_amount: 500000
+                  investment_horizon_years: 10
+                  current_allocation: {}
+              aggressive:
+                summary: Aggressive investor analysis  
+                value:
+                  risk_profile: "aggressive"
+                  investment_amount: 1000000
+                  investment_horizon_years: 15
+                  current_allocation:
+                    "AVANZA_USA": 0.3
+                    "DNB_GLOBAL_INDEKS_S": 0.2
+      responses:
+        '200':
+          description: Portfolio analysis completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortfolioAnalysisResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /portfolio/allocations/historical:
+    post:
+      tags:
+        - Portfolio Analysis
+      summary: Generate historical allocation analysis
+      description: Generate optimal allocation based on 20+ years of historical data analysis
+      operationId: generateHistoricalAllocation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HistoricalAllocationRequest'
+      responses:
+        '200':
+          description: Historical allocation analysis completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HistoricalAllocationResponse'
+
+  /portfolio/stress-test:
+    post:
+      tags:
+        - Portfolio Analysis
+      summary: Perform portfolio stress testing
+      description: Test portfolio performance against historical crisis scenarios
+      operationId: stressTestPortfolio
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StressTestRequest'
+      responses:
+        '200':
+          description: Stress test completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StressTestResponse'
+
+  # Fund Data Endpoints
+  /funds:
+    get:
+      tags:
+        - Fund Data
+      summary: List available funds
+      description: Get list of all available Swedish investment funds
+      operationId: listFunds
+      parameters:
+        - name: category
+          in: query
+          description: Filter funds by category
+          schema:
+            type: string
+            enum: [equity, bond, mixed, alternative, commodity]
+        - name: region
+          in: query
+          description: Filter funds by geographic region
+          schema:
+            type: string
+            enum: [global, usa, europe, sweden, emerging]
+      responses:
+        '200':
+          description: List of available funds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FundListResponse'
+
+  /funds/{fundCode}:
+    get:
+      tags:
+        - Fund Data
+      summary: Get fund details
+      description: Get detailed information about a specific fund
+      operationId: getFund
+      parameters:
+        - name: fundCode
+          in: path
+          required: true
+          description: Unique fund identifier
+          schema:
+            type: string
+            example: "AVANZA_USA"
+      responses:
+        '200':
+          description: Fund details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FundDetailsResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /funds/{fundCode}/historical:
+    get:
+      tags:
+        - Fund Data
+      summary: Get historical fund data
+      description: Retrieve historical performance data for a specific fund
+      operationId: getFundHistorical
+      parameters:
+        - name: fundCode
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: years
+          in: query
+          description: Number of years of historical data
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 25
+            default: 10
+        - name: include_indicators
+          in: query
+          description: Include technical indicators in response
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Historical data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FundHistoricalResponse'
+
+  /funds/performance/comparison:
+    post:
+      tags:
+        - Fund Data
+      summary: Compare fund performance
+      description: Compare historical performance of multiple funds
+      operationId: compareFundPerformance
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FundComparisonRequest'
+      responses:
+        '200':
+          description: Fund comparison completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FundComparisonResponse'
+
+  # Swedish Economic Data Endpoints
+  /economic/sweden/overview:
+    get:
+      tags:
+        - Swedish Economic Data
+      summary: Get Swedish economic overview
+      description: Get comprehensive overview of current Swedish economic indicators
+      operationId: getSwedishEconomicOverview
+      responses:
+        '200':
+          description: Economic overview retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SwedishEconomicOverviewResponse'
+
+  /economic/sweden/interest-rates:
+    get:
+      tags:
+        - Swedish Economic Data
+      summary: Get Swedish interest rates
+      description: Get current and historical Swedish interest rate data
+      operationId: getSwedishInterestRates
+      parameters:
+        - name: include_history
+          in: query
+          description: Include historical rate data
+          schema:
+            type: boolean
+            default: false
+        - name: months_back
+          in: query
+          description: Months of historical data to include
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 120
+            default: 12
+      responses:
+        '200':
+          description: Interest rate data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InterestRateResponse'
+
+  /economic/sweden/inflation:
+    get:
+      tags:
+        - Swedish Economic Data
+      summary: Get Swedish inflation data
+      description: Get current and historical Swedish inflation indicators
+      operationId: getSwedishInflation
+      responses:
+        '200':
+          description: Inflation data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InflationDataResponse'
+
+  /economic/sweden/housing:
+    get:
+      tags:
+        - Swedish Economic Data
+      summary: Get Swedish housing market data
+      description: Get Swedish housing price indices and market indicators
+      operationId: getSwedishHousingData
+      responses:
+        '200':
+          description: Housing data retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HousingDataResponse'
+
+  # Market Analysis Endpoints
+  /market/sentiment:
+    get:
+      tags:
+        - Market Analysis
+      summary: Get current market sentiment
+      description: Get AI-generated market sentiment analysis for Swedish markets
+      operationId: getMarketSentiment
+      responses:
+        '200':
+          description: Market sentiment retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MarketSentimentResponse'
+
+  /market/insights/daily:
+    get:
+      tags:
+        - Market Analysis
+      summary: Get daily market insights
+      description: Get AI-generated daily market insights and recommendations
+      operationId: getDailyMarketInsights
+      parameters:
+        - name: date
+          in: query
+          description: Specific date for insights (YYYY-MM-DD)
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Daily insights retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyInsightsResponse'
+
+  # AI Analysis Endpoints
+  /ai/investment-recommendation:
+    post:
+      tags:
+        - AI Analysis
+      summary: Get AI investment recommendation
+      description: Generate comprehensive AI-powered investment recommendation
+      operationId: getInvestmentRecommendation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InvestmentRecommendationRequest'
+      responses:
+        '200':
+          description: Investment recommendation generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InvestmentRecommendationResponse'
+
+  # System Endpoints
+  /health:
+    get:
+      tags:
+        - System
+      summary: Health check
+      description: Check API health and component status
+      operationId: healthCheck
+      security: []
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthCheckResponse'
+
+  /status:
+    get:
+      tags:
+        - System
+      summary: Get system status
+      description: Get detailed system status including data freshness
+      operationId: getSystemStatus
+      responses:
+        '200':
+          description: System status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemStatusResponse'
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication
+
+  schemas:
+    # Request Schemas
+    PortfolioAnalysisRequest:
+      type: object
+      required:
+        - risk_profile
+        - investment_amount
+      properties:
+        risk_profile:
+          type: string
+          enum: [conservative, balanced, aggressive]
+          description: Investor risk tolerance level
+        investment_amount:
+          type: number
+          minimum: 10000
+          maximum: 100000000
+          description: Investment amount in SEK
+        investment_horizon_years:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 10
+          description: Investment time horizon in years
+        current_allocation:
+          type: object
+          additionalProperties:
+            type: number
+            minimum: 0
+            maximum: 1
+          description: Current portfolio allocation (fund_code -> weight)
+        constraints:
+          type: object
+          properties:
+            max_funds:
+              type: integer
+              minimum: 1
+              maximum: 12
+              default: 8
+            min_allocation_per_fund:
+              type: number
+              minimum: 0.01
+              maximum: 0.5
+              default: 0.05
+            exclude_funds:
+              type: array
+              items:
+                type: string
+
+    HistoricalAllocationRequest:
+      type: object
+      required:
+        - risk_profile
+        - investment_horizon_years
+      properties:
+        risk_profile:
+          type: string
+          enum: [conservative, balanced, aggressive]
+        investment_horizon_years:
+          type: integer
+          minimum: 1
+          maximum: 50
+        include_stress_test:
+          type: boolean
+          default: true
+        historical_years:
+          type: integer
+          minimum: 5
+          maximum: 25
+          default: 20
+
+    StressTestRequest:
+      type: object
+      required:
+        - allocation
+      properties:
+        allocation:
+          type: object
+          additionalProperties:
+            type: number
+            minimum: 0
+            maximum: 1
+          description: Portfolio allocation to test
+        scenarios:
+          type: array
+          items:
+            type: string
+            enum: [2008_crisis, covid_2020, dotcom_2000, all]
+          default: ["all"]
+
+    FundComparisonRequest:
+      type: object
+      required:
+        - fund_codes
+      properties:
+        fund_codes:
+          type: array
+          items:
+            type: string
+          minItems: 2
+          maxItems: 12
+          description: List of fund codes to compare
+        comparison_period:
+          type: string
+          enum: [1y, 3y, 5y, 10y, 20y, max]
+          default: "5y"
+        metrics:
+          type: array
+          items:
+            type: string
+            enum: [return, volatility, sharpe, max_drawdown, all]
+          default: ["all"]
+
+    InvestmentRecommendationRequest:
+      type: object
+      required:
+        - risk_profile
+        - amount
+      properties:
+        risk_profile:
+          type: string
+          enum: [conservative, balanced, aggressive]
+        amount:
+          type: number
+          minimum: 10000
+        investment_horizon:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 10
+
+    # Response Schemas
+    PortfolioAnalysisResponse:
+      type: object
+      properties:
+        allocation:
+          type: object
+          additionalProperties:
+            type: number
+          description: Recommended allocation (fund_code -> weight)
+        expected_metrics:
+          $ref: '#/components/schemas/PortfolioMetrics'
+        historical_analysis:
+          $ref: '#/components/schemas/HistoricalAnalysis'
+        stress_test:
+          $ref: '#/components/schemas/StressTestResults'
+        swedish_economic_context:
+          $ref: '#/components/schemas/SwedishEconomicContext'
+        ai_reasoning:
+          type: object
+          properties:
+            allocation_rationale:
+              type: string
+            swedish_economic_rationale:
+              type: string
+            risk_assessment:
+              type: string
+        confidence_score:
+          type: number
+          minimum: 0
+          maximum: 1
+        generated_at:
+          type: string
+          format: date-time
+
+    HistoricalAllocationResponse:
+      type: object
+      properties:
+        allocation:
+          type: object
+          additionalProperties:
+            type: number
+        historical_reasoning:
+          type: string
+        performance_analysis:
+          $ref: '#/components/schemas/HistoricalPerformance'
+        regime_analysis:
+          $ref: '#/components/schemas/RegimeAnalysis'
+
+    StressTestResponse:
+      type: object
+      properties:
+        scenarios:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/StressTestScenario'
+        overall_risk_score:
+          type: number
+          minimum: 0
+          maximum: 100
+        recommendations:
+          type: array
+          items:
+            type: string
+
+    FundListResponse:
+      type: object
+      properties:
+        funds:
+          type: array
+          items:
+            $ref: '#/components/schemas/FundSummary'
+        total_count:
+          type: integer
+        categories:
+          type: object
+          additionalProperties:
+            type: integer
+
+    FundDetailsResponse:
+      type: object
+      properties:
+        fund_code:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        region:
+          type: string
+        description:
+          type: string
+        current_metrics:
+          $ref: '#/components/schemas/FundMetrics'
+        data_quality:
+          type: string
+          enum: [high, medium, low]
+
+    FundHistoricalResponse:
+      type: object
+      properties:
+        fund_code:
+          type: string
+        period:
+          type: object
+          properties:
+            start_date:
+              type: string
+              format: date
+            end_date:
+              type: string
+              format: date
+            data_points:
+              type: integer
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/HistoricalDataPoint'
+        summary_metrics:
+          $ref: '#/components/schemas/FundMetrics'
+
+    FundComparisonResponse:
+      type: object
+      properties:
+        funds:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/FundMetrics'
+        comparison_period:
+          type: string
+        best_performers:
+          type: object
+          properties:
+            return:
+              type: string
+            risk_adjusted:
+              type: string
+            volatility:
+              type: string
+
+    SwedishEconomicOverviewResponse:
+      type: object
+      properties:
+        economic_phase:
+          type: string
+        key_indicators:
+          $ref: '#/components/schemas/KeyEconomicIndicators'
+        trends:
+          $ref: '#/components/schemas/EconomicTrends'
+        investment_implications:
+          type: array
+          items:
+            type: string
+        last_updated:
+          type: string
+          format: date-time
+
+    InterestRateResponse:
+      type: object
+      properties:
+        current_repo_rate:
+          type: number
+        trend:
+          type: string
+          enum: [increasing, decreasing, stable]
+        next_decision_date:
+          type: string
+          format: date
+        historical_data:
+          type: array
+          items:
+            $ref: '#/components/schemas/InterestRateDataPoint'
+
+    InflationDataResponse:
+      type: object
+      properties:
+        current_cpi:
+          type: number
+        target:
+          type: number
+        trend:
+          type: string
+        components:
+          $ref: '#/components/schemas/InflationComponents'
+
+    HousingDataResponse:
+      type: object
+      properties:
+        price_index:
+          type: number
+        changes:
+          $ref: '#/components/schemas/HousingPriceChanges'
+        regional_data:
+          type: object
+          additionalProperties:
+            type: number
+        market_sentiment:
+          type: string
+
+    MarketSentimentResponse:
+      type: object
+      properties:
+        overall_sentiment:
+          type: string
+          enum: [bullish, bearish, neutral, volatile]
+        confidence_score:
+          type: number
+          minimum: 0
+          maximum: 100
+        factors:
+          type: array
+          items:
+            type: object
+            properties:
+              factor:
+                type: string
+              impact:
+                type: string
+                enum: [positive, negative, neutral]
+              weight:
+                type: number
+
+    DailyInsightsResponse:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        market_summary:
+          type: string
+        key_developments:
+          type: array
+          items:
+            type: string
+        recommendations:
+          type: array
+          items:
+            type: string
+        economic_context:
+          type: string
+
+    InvestmentRecommendationResponse:
+      type: object
+      properties:
+        recommended_allocation:
+          type: object
+          additionalProperties:
+            type: number
+        investment_plan:
+          $ref: '#/components/schemas/InvestmentPlan'
+        comprehensive_report:
+          type: string
+        confidence_rating:
+          type: number
+          minimum: 0
+          maximum: 1
+
+    HealthCheckResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+        components:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              status:
+                type: string
+              last_check:
+                type: string
+                format: date-time
+
+    SystemStatusResponse:
+      type: object
+      properties:
+        api_status:
+          type: string
+        data_freshness:
+          type: object
+          properties:
+            swedish_economic_data:
+              type: string
+              format: date-time
+            fund_price_data:
+              type: string
+              format: date-time
+            historical_cache:
+              type: string
+              format: date-time
+        performance_metrics:
+          type: object
+          properties:
+            avg_response_time_ms:
+              type: number
+            requests_per_minute:
+              type: number
+            error_rate:
+              type: number
+
+    # Shared Component Schemas
+    PortfolioMetrics:
+      type: object
+      properties:
+        expected_annual_return:
+          type: number
+        expected_volatility:
+          type: number
+        expected_sharpe_ratio:
+          type: number
+        expected_max_drawdown:
+          type: number
+        diversification_ratio:
+          type: number
+
+    HistoricalAnalysis:
+      type: object
+      properties:
+        performance_periods:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/PeriodPerformance'
+        correlation_analysis:
+          type: object
+        regime_performance:
+          $ref: '#/components/schemas/RegimeAnalysis'
+
+    HistoricalPerformance:
+      type: object
+      properties:
+        total_return:
+          type: object
+          additionalProperties:
+            type: number
+        annualized_return:
+          type: number
+        volatility:
+          type: number
+        best_year:
+          type: number
+        worst_year:
+          type: number
+        positive_years_percentage:
+          type: number
+
+    RegimeAnalysis:
+      type: object
+      properties:
+        bull_market:
+          $ref: '#/components/schemas/RegimePerformance'
+        bear_market:
+          $ref: '#/components/schemas/RegimePerformance'
+        high_volatility:
+          $ref: '#/components/schemas/RegimePerformance'
+        low_volatility:
+          $ref: '#/components/schemas/RegimePerformance'
+
+    RegimePerformance:
+      type: object
+      properties:
+        average_return:
+          type: number
+        volatility:
+          type: number
+        frequency:
+          type: number
+        max_drawdown:
+          type: number
+
+    StressTestResults:
+      type: object
+      properties:
+        scenarios:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/StressTestScenario'
+        worst_case_loss:
+          type: number
+        recovery_time_estimate:
+          type: string
+
+    StressTestScenario:
+      type: object
+      properties:
+        scenario_name:
+          type: string
+        portfolio_return:
+          type: number
+        duration_days:
+          type: integer
+        description:
+          type: string
+
+    SwedishEconomicContext:
+      type: object
+      properties:
+        current_phase:
+          type: string
+        key_rates:
+          type: object
+          properties:
+            repo_rate:
+              type: number
+            inflation:
+              type: number
+        investment_implications:
+          type: array
+          items:
+            type: string
+
+    FundSummary:
+      type: object
+      properties:
+        fund_code:
+          type: string
+        name:
+          type: string
+        category:
+          type: string
+        region:
+          type: string
+        ytd_return:
+          type: number
+        volatility:
+          type: number
+
+    FundMetrics:
+      type: object
+      properties:
+        annual_return:
+          type: number
+        volatility:
+          type: number
+        sharpe_ratio:
+          type: number
+        max_drawdown:
+          type: number
+        var_95:
+          type: number
+
+    HistoricalDataPoint:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        close:
+          type: number
+        daily_return:
+          type: number
+        volatility:
+          type: number
+
+    KeyEconomicIndicators:
+      type: object
+      properties:
+        repo_rate:
+          type: number
+        inflation_cpi:
+          type: number
+        gdp_growth:
+          type: number
+        unemployment_rate:
+          type: number
+        house_price_change:
+          type: number
+
+    EconomicTrends:
+      type: object
+      properties:
+        interest_rate_direction:
+          type: string
+        inflation_trend:
+          type: string
+        growth_momentum:
+          type: string
+
+    InterestRateDataPoint:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        repo_rate:
+          type: number
+        government_bond_10y:
+          type: number
+
+    InflationComponents:
+      type: object
+      properties:
+        core_inflation:
+          type: number
+        energy_inflation:
+          type: number
+        food_inflation:
+          type: number
+        housing_inflation:
+          type: number
+
+    HousingPriceChanges:
+      type: object
+      properties:
+        monthly:
+          type: number
+        quarterly:
+          type: number
+        annual:
+          type: number
+
+    InvestmentPlan:
+      type: object
+      properties:
+        fund_amounts:
+          type: object
+          additionalProperties:
+            type: number
+        rebalancing_schedule:
+          type: object
+          properties:
+            frequency:
+              type: string
+            next_review_date:
+              type: string
+              format: date
+        action_items:
+          type: array
+          items:
+            type: string
+
+    PeriodPerformance:
+      type: object
+      properties:
+        total_return:
+          type: number
+        annualized_return:
+          type: number
+        volatility:
+          type: number
+        sharpe_ratio:
+          type: number
+
+  responses:
+    BadRequest:
+      description: Bad request - invalid parameters
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              details:
+                type: array
+                items:
+                  type: string
+
+    Unauthorized:
+      description: Unauthorized - invalid or missing API key
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Invalid API key"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Fund not found"
+
+    RateLimitExceeded:
+      description: Rate limit exceeded
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Rate limit exceeded"
+              retry_after:
+                type: integer
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: "Internal server error"
+              request_id:
+                type: string
+
+tags:
+  - name: Portfolio Analysis
+    description: AI-powered portfolio analysis and optimization
+  - name: Fund Data
+    description: Swedish investment fund data and historical information
+  - name: Swedish Economic Data
+    description: Swedish economic indicators and market data
+  - name: Market Analysis
+    description: Market sentiment and daily insights
+  - name: AI Analysis
+    description: AI-powered investment recommendations
+  - name: System
+    description: System health and status endpoints

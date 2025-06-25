@@ -60,6 +60,14 @@ class Settings:
     DEBUG = safe_bool(os.getenv("DEBUG", "False"))
     LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
     
+    # AI Configuration - Optimized for local Ollama
+    AI_PROVIDER = os.getenv("AI_PROVIDER", "ollama")
+    OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "gemma3:1b")
+    OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+    OLLAMA_TIMEOUT = safe_int(os.getenv("OLLAMA_TIMEOUT", "30"), 30)
+    ANALYSIS_TEMPERATURE = float(os.getenv("ANALYSIS_TEMPERATURE", "0.3"))
+    ANALYSIS_MAX_TOKENS = safe_int(os.getenv("ANALYSIS_MAX_TOKENS", "1024"), 1024)
+    
     # Default symbols to track
     DEFAULT_STOCK_SYMBOLS = [
         "^OMX",      # OMX Stockholm

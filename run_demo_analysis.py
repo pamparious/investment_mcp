@@ -10,7 +10,7 @@ sys.path.append(os.path.dirname(__file__))
 
 from config.settings import Settings
 from backend.ai.config import AIConfig
-from backend.ai.analyzers import MarketAnalyzer, EconomicAnalyzer, PortfolioAnalyzer
+from backend.ai.analyzers import MarketAnalyzer, EconomicAnalyzer, ConstrainedPortfolioAnalyzer
 from backend.database import get_db_session
 from backend.models import MarketData, RiksbankData, SCBData
 
@@ -307,7 +307,7 @@ async def demo_portfolio_analysis():
     try:
         settings = Settings()
         ai_config = AIConfig(settings)
-        portfolio_analyzer = PortfolioAnalyzer(ai_config)
+        portfolio_analyzer = ConstrainedPortfolioAnalyzer(ai_config)
         
         # Get market data for portfolio analysis
         print("Creating sample portfolio from available market data...")
