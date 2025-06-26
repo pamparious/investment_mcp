@@ -1,0 +1,49 @@
+# Investment MCP System - Unified Requirements
+# Consolidated dependencies for the streamlined Investment MCP system
+
+# Core Framework
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+pydantic>=2.5.0
+pydantic-settings>=2.1.0
+
+# MCP Server
+mcp>=0.5.0
+
+# Database
+sqlalchemy>=2.0.0
+alembic>=1.13.0
+
+# Data Collection & Processing
+pandas>=2.1.0
+numpy>=1.25.0
+scipy>=1.11.0
+yfinance>=0.2.18
+aiohttp>=3.9.0
+requests>=2.31.0
+python-dateutil>=2.8.0
+pytz>=2023.3
+
+# AI Providers (Optional)
+openai>=1.0.0
+anthropic>=0.8.0
+# Note: Ollama requires separate installation
+
+# Configuration & Environment
+python-dotenv>=1.0.0
+
+# Data Validation & Parsing
+beautifulsoup4>=4.12.0
+
+# Utilities
+psutil>=5.9.0  # For system monitoring
+
+# Development & Testing (Optional)
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+black>=23.0.0
+isort>=5.12.0
+mypy>=1.5.0
+
+# Production (Optional)
+gunicorn>=21.0.0  # For production deployment
